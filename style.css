@@ -1,0 +1,124 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #212121;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+
+  /* Estilo da zona de drop */
+  margin-top: 20px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Estilo quando o arquivo é arrastado sobre a zona de drop */
+body.drag-over {
+  background-color: #f0f8ff; /* Cor de fundo mais clara */
+}
+
+/* Animação de pulsação */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+body.pulse {
+  animation: pulse 1s infinite;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+h1 {
+  font-size: 36px;
+  color: #ff9800;
+}
+
+/* Alteração: layout flexível para organizar lado a lado */
+main {
+  display: flex;
+  flex-direction: row; /* Coloca os elementos lado a lado */
+  align-items: center;
+  justify-content: center;
+  gap: 30px; /* Espaço entre os elementos */
+  width: 90%;
+  max-width: 900px;
+}
+
+/* Mantém os estilos dos controles */
+.controls {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 300px;
+}
+
+label {
+  font-size: 16px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* Estilizando input file */
+input[type="file"] {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+}
+
+button {
+  background-color: #ff9800;
+  color: #fff;
+  font-size: 18px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #e68900;
+}
+
+button:disabled {
+  background-color: #777;
+  cursor: not-allowed;
+}
+
+#musicStatus {
+  font-size: 18px;
+  color: #ff9800;
+}
+
+/* Novo: container do visualizador 3D */
+#sketch-container {
+  flex-grow: 1; /* Faz o canvas ocupar o restante do espaço disponível */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
