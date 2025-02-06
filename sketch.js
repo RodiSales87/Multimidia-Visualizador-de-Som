@@ -8,6 +8,8 @@ let limiar = 80;
 let tamanho = 25;
 let fase = 64;
 let corSelecionada = 0;
+let audioSource = null; // 'file' ou 'mic'
+let mic = null; // Variável para armazenar o objeto do microfone
 
 function setup() {
   let canvas = createCanvas(400, 400, WEBGL);
@@ -33,6 +35,21 @@ function setup() {
     atualizarGrade();
     redraw();
   });
+
+  document.getElementById('microfoneBtn').addEventListener('click', function() {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(function(stream) {
+        document.getElementById('microfoneStatus').textContent = 'Microfone ativado';
+        console.log('Microfone ativado com sucesso!');
+        setupAudioContext(); // Configura o áudio do microfone
+      })
+      .catch(function(err) {
+        document.getElementById('microfoneStatus').textContent = 'Erro ao acessar o microfone';
+        console.error('Erro ao acessar o microfone:', err);
+      });
+  });
+
+  document.getElementById('microfoneStopBtn').addEventListener('click', stopMicrophone);
 
   atualizarGrade();
 }
@@ -67,13 +84,50 @@ function startMusicVisualization() {
   }
 }
 
+function setupAudioContext() {
+  if (musica && musica.isPlaying()) {
+    musica.stop(); // Para a música se estiver tocando
+    document.getElementById("musicStatus").textContent = "Música parada.";
+    document.getElementById("stopBtn").disabled = true;
+  }
+
+  mic = new p5.AudioIn(); // Cria um novo objeto de microfone
+
+  mic.start(function() {
+    console.log('Microfone conectado com sucesso!');
+    fft.setInput(mic); // Conecta o microfone ao FFT
+    audioSource = 'mic'; // Define a fonte de áudio como microfone
+    document.getElementById('microfoneStatus').textContent = 'Microfone conectado e ativo';
+    document.getElementById('microfoneStopBtn').disabled = false; // Habilita o botão "Parar Microfone"
+  });
+}
+
+function stopMicrophone() {
+  if (mic) {
+    mic.stop(); // Para o microfone
+    mic = null; // Limpa o objeto do microfone
+    document.getElementById('microfoneStatus').textContent = 'Microfone desativado';
+    document.getElementById('microfoneStopBtn').disabled = true; // Desabilita o botão "Parar Microfone"
+    console.log('Microfone parado com sucesso!');
+  }
+}
+
 function loadAndPlayMusic(source) {
   if (musica) {
     musica.stop();
   }
 
+  // Para o microfone se estiver ativo
+  if (mic) {
+    mic.stop();
+    document.getElementById('microfoneStatus').textContent = 'Microfone desativado';
+    document.getElementById('microfoneStopBtn').disabled = true;
+  }
+
   musica = loadSound(source, () => {
     musica.play();
+    fft.setInput(musica); // Conecta a música ao FFT
+    audioSource = 'file'; // Define a fonte de áudio como arquivo
     document.getElementById("musicStatus").textContent = "Música carregada e tocando!";
     document.getElementById("stopBtn").disabled = false;
   }, (error) => {
@@ -106,6 +160,7 @@ function draw() {
   background(40);
   orbitControl();
   
+  // Analisa o espectro de áudio, independentemente da fonte
   espectro = fft.analyze();
   
   let totalCubos = num * num * num;
