@@ -14,21 +14,10 @@
   
   <main class="container">
     <div class="controls">  
-      <label for="musicFile">Escolha um arquivo MP3:</label>
-      <input type="file" id="musicFile" accept=".mp3" /> 
-      
-      <label for="microfoneAudio">Usar microfone:</label>
-      <audioInputs>
-        <button id="microfoneBtn">Ativar Microfone</button>
-        <button id="microfoneStopBtn" disabled>Parar Microfone</button>
-      </audioInputs>
-      <span id="microfoneStatus"></span>
-      
-      
       
       <label for="numCubes">Número de Cubos³ (2 a 20):</label>
       <input type="number" id="numCubes" min="2" max="20" value="10" />
-
+      
       <label for="cubeSize">Tamanho do Cubo (10 a 50):</label>
       <input type="number" id="cubeSize" min="10" max="50" value="25" />
       
@@ -41,17 +30,29 @@
         <option value="40">Laranja</option>
       </select>
       
-      <button id="startBtn">Iniciar Visualização</button>
-      <button id="stopBtn" disabled>Parar Música</button>
+      
+      <label for="microfoneAudio">Usar microfone:</label>
+      <audioInputs>
+        <button id="microfoneBtn">Ativar Microfone</button>
+        <button id="microfoneStopBtn" disabled>Parar Microfone</button>
+      </audioInputs>
+      <span id="microfoneStatus"></span>
+      
+      <label for="musicFile">Escolha um arquivo MP3:</label>
+      <input type="file" id="musicFile" accept=".mp3" /> 
+      <audioInputs>
+        <button id="startBtn">Iniciar Música</button>
+        <button id="stopBtn" disabled>Parar Música</button>
+      </audioInputs>
       <div id="musicStatus"></div>
     </div>
 
-    <writeSide>
+    <rightSide>
       <header>
         <h1>Visualizador de Música 3D</h1>
       </header>
       <div id="sketch-container"></div>
-    </writeSide>
+    </rightSide>
   </main>
 
   <script src="sketch.js"></script>

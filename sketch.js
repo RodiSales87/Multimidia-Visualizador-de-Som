@@ -8,8 +8,8 @@ let limiar = 80;
 let tamanho = 25;
 let fase = 64;
 let corSelecionada = 0;
-let audioSource = null; // 'file' ou 'mic'
-let mic = null; // Variável para armazenar o objeto do microfone
+let audioSource = null; 
+let mic = null; 
 
 function setup() {
   let canvas = createCanvas(400, 400, WEBGL);
@@ -36,19 +36,7 @@ function setup() {
     redraw();
   });
 
-  document.getElementById('microfoneBtn').addEventListener('click', function() {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      .then(function(stream) {
-        document.getElementById('microfoneStatus').textContent = 'Microfone ativado';
-        console.log('Microfone ativado com sucesso!');
-        setupAudioContext(); // Configura o áudio do microfone
-      })
-      .catch(function(err) {
-        document.getElementById('microfoneStatus').textContent = 'Erro ao acessar o microfone';
-        console.error('Erro ao acessar o microfone:', err);
-      });
-  });
-
+  document.getElementById('microfoneBtn').addEventListener('click', ativarMicrofone);
   document.getElementById('microfoneStopBtn').addEventListener('click', stopMicrophone);
 
   atualizarGrade();
@@ -73,6 +61,18 @@ function atualizarGrade() {
   distCentro.sort(compararDistancias);
 }
 
+function obterDistanciaDoCentro(i, j, k) {
+  let deslocamento = (1 - num) * tamanho / 2;
+  let x = i * tamanho + deslocamento;
+  let y = j * tamanho + deslocamento;
+  let z = k * tamanho + deslocamento;
+  return dist(x, y, z, 0, 0, 0);
+}
+
+function compararDistancias(a, b) {
+  return a.distancia - b.distancia;
+}
+
 function startMusicVisualization() {
   let fileInput = document.getElementById("musicFile").files[0];
 
@@ -84,30 +84,34 @@ function startMusicVisualization() {
   }
 }
 
-function setupAudioContext() {
-  if (musica && musica.isPlaying()) {
-    musica.stop(); // Para a música se estiver tocando
-    document.getElementById("musicStatus").textContent = "Música parada.";
-    document.getElementById("stopBtn").disabled = true;
-  }
+function ativarMicrofone() {
+  userStartAudio().then(() => {
+    if (musica && musica.isPlaying()) {
+      musica.stop();
+      document.getElementById("musicStatus").textContent = "Música parada.";
+      document.getElementById("stopBtn").disabled = true;
+    }
 
-  mic = new p5.AudioIn(); // Cria um novo objeto de microfone
-
-  mic.start(function() {
-    console.log('Microfone conectado com sucesso!');
-    fft.setInput(mic); // Conecta o microfone ao FFT
-    audioSource = 'mic'; // Define a fonte de áudio como microfone
-    document.getElementById('microfoneStatus').textContent = 'Microfone conectado e ativo';
-    document.getElementById('microfoneStopBtn').disabled = false; // Habilita o botão "Parar Microfone"
+    mic = new p5.AudioIn();
+    mic.start(() => {
+      console.log('Microfone conectado com sucesso!');
+      fft.setInput(mic);
+      audioSource = 'mic';
+      document.getElementById('microfoneStatus').textContent = 'Microfone conectado e ativo';
+      document.getElementById('microfoneStopBtn').disabled = false;
+    });
+  }).catch(err => {
+    console.error('Erro ao iniciar o contexto de áudio:', err);
+    document.getElementById('microfoneStatus').textContent = 'Erro ao ativar áudio';
   });
 }
 
 function stopMicrophone() {
   if (mic) {
-    mic.stop(); // Para o microfone
-    mic = null; // Limpa o objeto do microfone
+    mic.stop();
+    mic = null;
     document.getElementById('microfoneStatus').textContent = 'Microfone desativado';
-    document.getElementById('microfoneStopBtn').disabled = true; // Desabilita o botão "Parar Microfone"
+    document.getElementById('microfoneStopBtn').disabled = true;
     console.log('Microfone parado com sucesso!');
   }
 }
@@ -117,17 +121,17 @@ function loadAndPlayMusic(source) {
     musica.stop();
   }
 
-  // Para o microfone se estiver ativo
   if (mic) {
     mic.stop();
+    mic = null;
     document.getElementById('microfoneStatus').textContent = 'Microfone desativado';
     document.getElementById('microfoneStopBtn').disabled = true;
   }
 
   musica = loadSound(source, () => {
     musica.play();
-    fft.setInput(musica); // Conecta a música ao FFT
-    audioSource = 'file'; // Define a fonte de áudio como arquivo
+    fft.setInput(musica);
+    audioSource = 'file';
     document.getElementById("musicStatus").textContent = "Música carregada e tocando!";
     document.getElementById("stopBtn").disabled = false;
   }, (error) => {
@@ -144,34 +148,24 @@ function stopMusic() {
   }
 }
 
-function obterDistanciaDoCentro(i, j, k) {
-  let deslocamento = (1 - num) * tamanho / 2;
-  let x = i * tamanho + deslocamento;
-  let y = j * tamanho + deslocamento;
-  let z = k * tamanho + deslocamento;
-  return dist(x, y, z, 0, 0, 0);
-}
 
-function compararDistancias(a, b) {
-  return a.distancia - b.distancia;
-}
+
 
 function draw() {
   background(40);
   orbitControl();
-  
-  // Analisa o espectro de áudio, independentemente da fonte
+
   espectro = fft.analyze();
-  
+
   let totalCubos = num * num * num;
   for (let i = 0; i < totalCubos; i++) {
     let pos = distCentro[i];
     grade[pos.i][pos.j][pos.k] = espectro[i];
   }
-  
+
   let deslocamento = (1 - num) * tamanho / 2;
   translate(deslocamento, deslocamento, deslocamento);
-  
+
   for (let i = 0; i < num; i++) {
     for (let j = 0; j < num; j++) {
       for (let k = 0; k < num; k++) {
@@ -191,5 +185,5 @@ function draw() {
         pop();
       }
     }
-  } 
+  }
 }
